@@ -9,12 +9,14 @@
 int ePlaca(char *str);
 int eCPF(char *str);
 int cpfValido(char *str);
+int eEmail(char *str);
 int charToInt(char caractere);
 
 int main(int argC, char *argV[]) {
 	setlocale(LC_ALL,"");
 	
 	char *str = malloc(MAX_STRING_SZ);
+	
 	if (str == NULL) {
 		printf("No memory\n");
 		return 1;
@@ -24,8 +26,7 @@ int main(int argC, char *argV[]) {
 		printf("Digite a string: ");
 		fgets(str, MAX_STRING_SZ, stdin);
 
-		if ((strlen(str) > 0) && (str[strlen (str) - 1] == '\n'))
-			str[strlen (str) - 1] = '\0';
+		if ((strlen(str) > 0) && (str[strlen (str) - 1] == '\n')) str[strlen (str) - 1] = '\0';
 
 		printf("String: %s\n", str);
 		
@@ -38,23 +39,26 @@ int main(int argC, char *argV[]) {
 		}else if(strlen(str)==11){
 			if(eCPF(str)){
 				printf("É um CPF.\n\n");
-				printf((cpfValido(str)) ? "Válido\n" : "Inválido\n\n");
+				printf((cpfValido(str)) ? "Válido\n\n" : "Inválido\n\n");
 			}else{
 				printf("Não foi possível identificar.\n\n");
 			}
 		}else{
-			
+			if(eEmail(str)){
+				printf("É um endereço de e-mail.\n\n");
+			}else{
+				printf("Não foi possível identificar.\n\n");
+			}
 		}
 		
 		do {
 			printf("Deseja continuar?(S/N) ");
 			fgets(str, MAX_STRING_SZ, stdin);
 
-			if ((strlen(str) > 0) && (str[strlen (str) - 1] == '\n'))
-				str[strlen (str) - 1] = '\0';
-		} while(strcmp(str, "S") && strcmp(str, "N"));
+			if ((strlen(str) > 0) && (str[strlen (str) - 1] == '\n')) str[strlen (str) - 1] = '\0';
+		} while(strcmp(strlwr (str), "s") && strcmp(strlwr (str), "n"));
 		
-	} while(!strcmp(str, "S"));
+	} while(!strcmp(strlwr (str), "s"));
 
 	/* Libera a memória e fecha. */
 	free(str);
@@ -68,20 +72,24 @@ int ePlaca(char *str){
 	
 	for (int i = 0; i < 3; i++){
 		saoLetras = (saoLetras&&isalpha(str[i]));
-		/* printf("Sao letras: %d | ", saoLetras);
-		if(isalpha(str[i])){
-			printf("Character %c in %s is alphabetic\n", str[i], str);
-		}else{
-			printf("Character %c in %s is not alphabetic\n", str[i], str);
-		}		*/
+			/*
+			printf("São letras: %d | ", saoLetras);
+			if(isalpha(str[i])){
+				printf("Character %c in %s is alphabetic\n", str[i], str);
+			}else{
+				printf("Character %c in %s is not alphabetic\n", str[i], str);
+			}
+			*/
 	}
+	
 	
 	/*
 	if (saoLetras){
 		printf("Os 3 primeiros dígitos são letras.\n");
 	}else{
 		printf("Um ou mais dos 3 primeiros dígitos não são letras.\n");
-	}*/
+	} 
+	*/
 	
 	for (int i = 3; i < strlen(str); i++){
 		saoNumeros = (saoNumeros&&isdigit(str[i]));
@@ -103,7 +111,6 @@ int ePlaca(char *str){
 	
 	return retorno;
 }
-
 
 int eCPF(char *str){
 	int retorno = 1;
@@ -166,6 +173,21 @@ int cpfValido(char *str){
 	
 	retorno = (primeiroDigitoValido&&segundoDigitoValido);
 	return retorno;
+}
+
+int eEmail(char *str){
+	char *dominio;
+	char *categoriaDeDominio;
+	
+	dominio = strchr(str, '@');
+	categoriaDeDominio = strchr(str, '.');
+	if ((dominio != NULL) && (strlen(categoriaDeDominio)>=3)){
+		printf("Domínio do e-mail: %s\n", dominio);
+		printf("Categoria de domínio: %s\n", categoriaDeDominio);
+		return 1;
+	} else {
+		return 0;
+	}	
 }
 
 int charToInt(char caractere){
