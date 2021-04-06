@@ -6,27 +6,29 @@
 
 #define MAX_STRING_SZ 256
 
+void desenhaTitulo();
 int ePlaca(char *str);
 int eCPF(char *str);
 int cpfValido(char *str);
 int eEmail(char *str);
+void *leTeclado(char *saida, char *entrada);
 int charToInt(char caractere);
 
 int main(int argC, char *argV[]) {
+	/* Altera o padrão para a localidade do SO */
 	setlocale(LC_ALL,"");
 	
+	/* Aloca memória, e checa se realmente foi alocado */
 	char *str = malloc(MAX_STRING_SZ);
-	
 	if (str == NULL) {
 		printf("No memory\n");
 		return 1;
 	}
-
+	
+	desenhaTitulo();
+	/* Inicia um loop de entrada de String até que o usuário defina que não quer continuar */
 	do {
-		printf("Digite a string: ");
-		fgets(str, MAX_STRING_SZ, stdin);
-
-		if ((strlen(str) > 0) && (str[strlen (str) - 1] == '\n')) str[strlen (str) - 1] = '\0';
+		leTeclado("Digite a string: ", str);
 
 		printf("String: %s\n", str);
 		
@@ -38,8 +40,8 @@ int main(int argC, char *argV[]) {
 			}
 		}else if(strlen(str)==11){
 			if(eCPF(str)){
-				printf("É um CPF.\n\n");
-				printf((cpfValido(str)) ? "Válido\n\n" : "Inválido\n\n");
+				printf("É um CPF");
+				printf((cpfValido(str)) ? " Válido.\n\n" : " Inválido.\n\n");
 			}else{
 				printf("Não foi possível identificar.\n\n");
 			}
@@ -52,17 +54,24 @@ int main(int argC, char *argV[]) {
 		}
 		
 		do {
-			printf("Deseja continuar?(S/N) ");
-			fgets(str, MAX_STRING_SZ, stdin);
-
-			if ((strlen(str) > 0) && (str[strlen (str) - 1] == '\n')) str[strlen (str) - 1] = '\0';
+			leTeclado("Deseja continuar?(S/N) ", str);
 		} while(strcmp(strlwr (str), "s") && strcmp(strlwr (str), "n"));
-		
+		printf("__________________________________\n\n");
 	} while(!strcmp(strlwr (str), "s"));
 
-	/* Libera a memória e fecha. */
+	/* Libera a memória e sai. */
 	free(str);
 	return 0;
+}
+
+void desenhaTitulo(){
+	printf("\n");
+	printf(" _____ _       _                   _   _         _   _ ___ _        \n");
+	printf("|   __| |_ ___|_|___ ___    ___   |_|_| |___ ___| |_|_|  _|_|___ ___ \n");
+	printf("|__   |  _|  _| |   | . |  |___|  | | . | -_|   |  _| |  _| | -_|  _|\n");
+	printf("|_____|_| |_| |_|_|_|_  |         |_|___|___|_|_|_| |_|_| |_|___|_|  \n");
+	printf("                    |___|                                            \n");
+	printf("\n");
 }
 
 int ePlaca(char *str){
@@ -70,6 +79,7 @@ int ePlaca(char *str){
 	int saoLetras = 1;
 	int saoNumeros = 1;
 	
+	/* Verifica se os três primeiros caracteres são letras */
 	for (int i = 0; i < 3; i++){
 		saoLetras = (saoLetras&&isalpha(str[i]));
 			/*
@@ -91,6 +101,7 @@ int ePlaca(char *str){
 	} 
 	*/
 	
+	/* Verifica se os quatro últimos caracteres são numerais decimasis */
 	for (int i = 3; i < strlen(str); i++){
 		saoNumeros = (saoNumeros&&isdigit(str[i]));
 		/*printf("Sao numeros: %d | ", saoNumeros);
@@ -115,6 +126,7 @@ int ePlaca(char *str){
 int eCPF(char *str){
 	int retorno = 1;
 	
+	/* Verifica se todos os caracteres são numerais decimais */
 	for (int i = 0; i < strlen(str); i++){
 		retorno = (retorno&&isdigit(str[i]));
 	}
@@ -133,11 +145,16 @@ int cpfValido(char *str){
 	int multiplicador = 10;
 	int somaPrimeiroDigito = 0;
 	for (int i = 0; i < 9; i++){
+		/*
 		printf("Soma: %d | Dígito: %d | Multiplicador: %d\n", somaPrimeiroDigito, charToInt(str[i]), multiplicador);
+		*/
 		somaPrimeiroDigito += charToInt(str[i])*multiplicador;
 		multiplicador--;
 	}
+	/*
 	printf("Soma do primeiro dígito: %d\n", somaPrimeiroDigito);
+	*/
+	
 	/* O próximo passo da verificação também é simples, basta multiplicarmos esse resultado por 10 e dividirmos por 11. */
 	/*O resultado que nos interessa na verdade é o RESTO da divisão. 
 	Se ele for igual ao primeiro dígito verificador (primeiro dígito depois do '-'), a primeira parte da validação está correta.*/
@@ -150,7 +167,9 @@ int cpfValido(char *str){
 	
 	/* Verifica validade do primeiro dígito */
 	primeiroDigitoValido = (primeiroDigitoVerificador == charToInt(str[9]));
+	/*
 	printf("Primeiro dígito %d é válido: %d\n", primeiroDigitoVerificador, primeiroDigitoValido);
+	*/
 	
 	/* Validação do segundo dígito */
 	/*A validação do segundo dígito é semelhante à primeira. */ 
@@ -158,36 +177,62 @@ int cpfValido(char *str){
 	multiplicador = 11;
 	int somaSegundoDigito = 0;
 	for (int i = 0; i < 10; i++){
+		/*
 		printf("Soma: %d | Dígito: %d | Multiplicador: %d\n", somaSegundoDigito, charToInt(str[i]), multiplicador);
+		*/
 		somaSegundoDigito += charToInt(str[i])*multiplicador;
 		multiplicador--;
 	}
+	/*
 	printf("Soma do segundo dígito: %d\n", somaSegundoDigito);
+	*/
+	
 	int segundoDigitoVerificador = (somaSegundoDigito*10)%11;
 	if (segundoDigitoVerificador == 10) {
 		segundoDigitoVerificador = 0;	
 	} 
+	
 	/* Verifica validade do segundo dígito */
 	segundoDigitoValido = (segundoDigitoVerificador == charToInt(str[10]));
+	/*
 	printf("Segundo dígito %d  é válido: %d\n", segundoDigitoVerificador, segundoDigitoValido);
+	*/
 	
 	retorno = (primeiroDigitoValido&&segundoDigitoValido);
 	return retorno;
+}
+
+void *leTeclado(char *saida, char *entrada){
+	/* Imprime a saída, e lê a entrada respeitando o tamanho definido*/
+	printf(saida);
+	fgets(entrada, MAX_STRING_SZ, stdin);
+	
+	/* Remove a quebra de linha não intencional, caso exista */
+	if ((strlen(entrada) > 0) && (entrada[strlen (entrada) - 1] == '\n')) entrada[strlen (entrada) - 1] = '\0';
 }
 
 int eEmail(char *str){
 	char *dominio;
 	char *categoriaDeDominio;
 	
+	/* Procura o caractere '@' na String, e retorna o resto da string a partir dele */
 	dominio = strchr(str, '@');
+	/* Procura o caractere '.' na Substring, e retorna o resto da substring a partir dele */
 	categoriaDeDominio = strchr(str, '.');
-	if ((dominio != NULL) && (strlen(categoriaDeDominio)>=3)){
-		printf("Domínio do e-mail: %s\n", dominio);
-		printf("Categoria de domínio: %s\n", categoriaDeDominio);
-		return 1;
+	
+	/* Verifica se foi possível achar o '@', e se o domínio é válido */
+	if ((dominio != NULL) && (categoriaDeDominio != NULL)){
+		if(strlen(categoriaDeDominio)>=3){
+			/*
+			printf("Domínio do e-mail: %s\n", dominio);
+			printf("Categoria de domínio: %s\n", categoriaDeDominio);
+			*/
+			return 1;
+		}
+		return 0;
 	} else {
 		return 0;
-	}	
+	}
 }
 
 int charToInt(char caractere){
