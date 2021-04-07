@@ -130,16 +130,27 @@ int eCPF(char *str){
 }
 
 int cpfValido(char *str){
-	/* A verificação do CPF acontece utilizando os 9 primeiros dígitos e, com um cálculo simples, verificando se o resultado corresponde aos dois últimos dígitos (depois do sinal "-"). */
 	int retorno = 1;
 	int primeiroDigitoValido = 1;
 	int segundoDigitoValido = 1;
 	
+	/* Verifica se todos os dígitos são iguais (CPF inválido) */
+	int saoIguais = 1;
+	for (int i = 1; i < strlen(str); i++){
+		if(str[i-1]!=str[i]){
+			saoIguais = 0;
+		}
+	}
+	if (saoIguais){
+		return 0;
+	}
+	
 	printf("\n");
 	/* Validação do primeiro dígito */
-	/* Primeiramente multiplica-se os 9 primeiros dígitos pela sequência decrescente de números de 10 à 2 e soma os resultados. */
+	/* Primeiramente multiplica-se os 9 primeiros dígitos pela sequência decrescente de números de 10 à 2 e soma-se os resultados. */
 	int multiplicador = 10;
 	int somaPrimeiroDigito = 0;
+	int primeiroDigitoVerificador;
 	for (int i = 0; i < 9; i++){
 		printf("Soma: %d | Dígito: %d | Multiplicador: %d\n", somaPrimeiroDigito, charToInt(str[i]), multiplicador);
 		somaPrimeiroDigito += charToInt(str[i])*multiplicador;
@@ -147,15 +158,17 @@ int cpfValido(char *str){
 	}
 	printf("Soma do primeiro dígito: %d\n", somaPrimeiroDigito);
 	
-	/* O próximo passo da verificação também é simples, basta multiplicarmos esse resultado por 10 e dividirmos por 11. */
+	/* O resultado obtido será divido por 11. 
+	Considere como quociente apenas o valor inteiro, o resto da divisão será responsável pelo cálculo do primeiro dígito verificador. */
 	/*O resultado que nos interessa na verdade é o RESTO da divisão. 
 	Se ele for igual ao primeiro dígito verificador (primeiro dígito depois do '-'), a primeira parte da validação está correta.*/
-	int primeiroDigitoVerificador = (somaPrimeiroDigito*10)%11;
+	int resto = somaPrimeiroDigito%11;
 	
-	/* Observação Importante: Se o resto da divisão for igual a 10, nós o consideramos como 0. */
-	if (primeiroDigitoVerificador == 10) {
-		(primeiroDigitoVerificador = 0);
-	} 
+	if (resto < 2) {
+		primeiroDigitoVerificador = 0;
+	} else {
+		primeiroDigitoVerificador = 11 - resto;	
+	}
 	
 	/* Verifica validade do primeiro dígito */
 	primeiroDigitoValido = (primeiroDigitoVerificador == charToInt(str[9]));
@@ -166,6 +179,7 @@ int cpfValido(char *str){
 	/* Porém vamos considerar os 9 primeiros dígitos, mais o primeiro dígito verificador, e vamos multiplicar esses 10 números pela sequencia decrescente de 11 a 2.*/
 	multiplicador = 11;
 	int somaSegundoDigito = 0;
+	int segundoDigitoVerificador;
 	for (int i = 0; i < 10; i++){
 		printf("Soma: %d | Dígito: %d | Multiplicador: %d\n", somaSegundoDigito, charToInt(str[i]), multiplicador);
 		somaSegundoDigito += charToInt(str[i])*multiplicador;
@@ -173,10 +187,12 @@ int cpfValido(char *str){
 	}
 	printf("Soma do segundo dígito: %d\n", somaSegundoDigito);
 	
-	int segundoDigitoVerificador = (somaSegundoDigito*10)%11;
-	if (segundoDigitoVerificador == 10) {
-		segundoDigitoVerificador = 0;	
-	} 
+	resto = somaSegundoDigito%11;
+	if (resto < 2) {
+		segundoDigitoVerificador = 0;
+	} else {
+		segundoDigitoVerificador = 11 - resto;	
+	}
 	
 	/* Verifica validade do segundo dígito */
 	segundoDigitoValido = (segundoDigitoVerificador == charToInt(str[10]));
