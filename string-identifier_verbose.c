@@ -40,15 +40,15 @@ int main(int argC, char *argV[]) {
 			}
 		}else if(strlen(str)==11){
 			if(eCPF(str)){
-				printf("É um CPF %s.\n\n",(cpfValido(str)) ? "Válido" : "Inválido");
+				printf("\nÉ um CPF %s", (cpfValido(str)) ? "Válido.\n\n" : "Inválido.\n\n");
 			}else{
-				printf("Não foi possível identificar.\n\n");
+				printf("\nNão foi possível identificar.\n\n");
 			}
 		}else{
 			if(eEmail(str)){
-				printf("É um endereço de e-mail.\n\n");
+				printf("\nÉ um endereço de e-mail.\n\n");
 			}else{
-				printf("Não foi possível identificar.\n\n");
+				printf("\nNão foi possível identificar.\n\n");
 			}
 		}
 		
@@ -71,6 +71,7 @@ void desenhaTitulo(){
 	printf("|_____|_| |_| |_|_|_|_  |         |_|___|___|_|_|_| |_|_| |_|___|_|  \n");
 	printf("                    |___|                                            \n");
 	printf("\n");
+	printf("Verbose mode: ON\n\n");
 }
 
 int ePlaca(char *str){
@@ -79,19 +80,39 @@ int ePlaca(char *str){
 	int saoNumeros = 1;
 	
 	/* Verifica se os três primeiros caracteres são letras */
+	printf("\n");
 	for (int i = 0; i < 3; i++){
 		saoLetras = (saoLetras&&isalpha(str[i]));
+			if(isalpha(str[i])){
+				printf("Caractere %c em %s é alfabético\n", str[i], str);
+			}else{
+				printf("Caractere %c em %s não é alfabético\n", str[i], str);
+			}
 	}
 	
-	if(!saoLetras){
+	if (saoLetras){
+		printf("Os 3 primeiros dígitos são letras do alfabeto.\n\n");
+	}else{
+		printf("Um ou mais dos 3 primeiros dígitos não são letras do alfabeto.\n\n");
 		return 0;
-	}
+	} 
 	
 	/* Verifica se os quatro últimos caracteres são numerais decimasis */
 	for (int i = 3; i < strlen(str); i++){
 		saoNumeros = (saoNumeros&&isdigit(str[i]));
+		if(isdigit(str[i])){
+			printf("Caractere %c em %s é decimal\n", str[i], str);
+		}else{
+			printf("Caractere %c em %s não é decimal\n", str[i], str);
+		}
 	}
-
+	
+	if (saoNumeros){
+		printf("Os 4 últimos dígitos são numeros.\n\n");
+	}else{
+		printf("Um ou mais dos 4 últimos dígitos não são numeros.\n\n");
+	}
+	
 	retorno = saoLetras&&saoNumeros;
 	
 	return retorno;
@@ -114,16 +135,21 @@ int cpfValido(char *str){
 	int primeiroDigitoValido = 1;
 	int segundoDigitoValido = 1;
 	
+	printf("\n");
 	/* Validação do primeiro dígito */
 	/* Primeiramente multiplica-se os 9 primeiros dígitos pela sequência decrescente de números de 10 à 2 e soma os resultados. */
 	int multiplicador = 10;
 	int somaPrimeiroDigito = 0;
 	for (int i = 0; i < 9; i++){
+		printf("Soma: %d | Dígito: %d | Multiplicador: %d\n", somaPrimeiroDigito, charToInt(str[i]), multiplicador);
 		somaPrimeiroDigito += charToInt(str[i])*multiplicador;
 		multiplicador--;
 	}
+	printf("Soma do primeiro dígito: %d\n", somaPrimeiroDigito);
 	
 	/* O próximo passo da verificação também é simples, basta multiplicarmos esse resultado por 10 e dividirmos por 11. */
+	/*O resultado que nos interessa na verdade é o RESTO da divisão. 
+	Se ele for igual ao primeiro dígito verificador (primeiro dígito depois do '-'), a primeira parte da validação está correta.*/
 	int primeiroDigitoVerificador = (somaPrimeiroDigito*10)%11;
 	
 	/* Observação Importante: Se o resto da divisão for igual a 10, nós o consideramos como 0. */
@@ -133,6 +159,7 @@ int cpfValido(char *str){
 	
 	/* Verifica validade do primeiro dígito */
 	primeiroDigitoValido = (primeiroDigitoVerificador == charToInt(str[9]));
+	printf("Primeiro dígito %d é válido: %d\n\n", primeiroDigitoVerificador, primeiroDigitoValido);
 	
 	/* Validação do segundo dígito */
 	/*A validação do segundo dígito é semelhante à primeira. */ 
@@ -140,9 +167,11 @@ int cpfValido(char *str){
 	multiplicador = 11;
 	int somaSegundoDigito = 0;
 	for (int i = 0; i < 10; i++){
+		printf("Soma: %d | Dígito: %d | Multiplicador: %d\n", somaSegundoDigito, charToInt(str[i]), multiplicador);
 		somaSegundoDigito += charToInt(str[i])*multiplicador;
 		multiplicador--;
 	}
+	printf("Soma do segundo dígito: %d\n", somaSegundoDigito);
 	
 	int segundoDigitoVerificador = (somaSegundoDigito*10)%11;
 	if (segundoDigitoVerificador == 10) {
@@ -151,6 +180,7 @@ int cpfValido(char *str){
 	
 	/* Verifica validade do segundo dígito */
 	segundoDigitoValido = (segundoDigitoVerificador == charToInt(str[10]));
+	printf("Segundo dígito %d é válido: %d\n", segundoDigitoVerificador, segundoDigitoValido);
 	
 	retorno = (primeiroDigitoValido&&segundoDigitoValido);
 	return retorno;
@@ -177,6 +207,8 @@ int eEmail(char *str){
 	/* Verifica se foi possível achar o '@', e se o domínio é válido */
 	if ((dominio != NULL) && (categoriaDeDominio != NULL)){
 		if(strlen(categoriaDeDominio)>=3){
+			printf("\nDomínio do e-mail: %s\n", dominio);
+			printf("Categoria de domínio: %s\n", categoriaDeDominio);
 			return 1;
 		}
 		return 0;
